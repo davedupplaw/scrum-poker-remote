@@ -36,7 +36,7 @@
     "morgan": "^1.7.0",
     "nconf": "^0.10.0",
     "nodemon": "^1.18.4",
-    "request": "^2.85.0",
+    "request": "^2.88.0",
     "ts-loader": "^2.0.2",
     "tslint": "^5.10.0",
     "typescript": "^2.2.1",
