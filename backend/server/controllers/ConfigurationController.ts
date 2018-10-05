@@ -12,8 +12,6 @@ export default class ConfigurationController {
 
     public configuration(req: express.Request, res: express.Response) {
         res.send({
-            showProjectsWithoutBuilds: process.env.GCIWB_INCLUDE_NO_BUILDS !== 'false',
-            showSemanticsCard: process.env.GCIWB_SHOW_SEMANTICS !== 'false'
         } as FrontendConfig);
     }
 }

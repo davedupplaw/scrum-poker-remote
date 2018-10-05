@@ -1,0 +1,4 @@
+<form #form="ngForm">
+  <input type="text" name="name" id="name" placeholder="Your Name" required [(ngModel)]="registration.name" />
+  <button type="buttom" (click)="submit(form.value)">Join</button>
+</form>

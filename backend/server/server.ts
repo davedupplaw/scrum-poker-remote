@@ -6,13 +6,16 @@ import * as root from 'app-root-path';
 import * as cookieParser from 'cookie-parser';
 import * as http from 'http';
 import * as cors from 'cors';
+import * as WebSocket from 'ws';
 
 import IndexController from './controllers/IndexController';
 import ConfigurationController from './controllers/ConfigurationController';
+import {Registration} from '../../shared/domain/Registration';
 
 export default class Server {
     private readonly _app: Application;
     private _server: http.Server;
+    private wss: WebSocket.Server;
 
     constructor(app: Application) {
         this._app = app;
@@ -56,15 +59,27 @@ export default class Server {
     public listen(port: number) {
         this._app.set('port', port);
         this._server = http.createServer(this._app);
-        this._server.listen(port);
 
         this._server.on('error', (error) => Server.errorHandler(error, port));
         this._server.on('listening', () => this.listeningHandler);
+
+        this._server.listen(port);
+        this.sockets();
+
+        console.log('>>>>>>>>>>>>>>>>>>> HERE <<<<<<<<<<<<<<<<<<<<');
+
+        this.wss.on('connection', function connection(ws: WebSocket) {
+            ws.on('message', function incoming(message) {
+                console.log('received: %s', message);
+            });
+
+            ws.send('something');
+        });
     }
 
     private listeningHandler() {
-        const bind = `port ${this._server.address().port}`;
-        log(`Listening on ${bind}`);
+        const bind = `port ${this._server.address()}`;
+        console.log(`Listening on ${bind}`);
     }
 
     private viewEngineSetup() {
@@ -119,5 +134,9 @@ export default class Server {
                 error: {}
             });
         });
+    }
+
+    private sockets(): void {
+        this.wss = new WebSocket.Server({ port: 3001 });
     }
 }
