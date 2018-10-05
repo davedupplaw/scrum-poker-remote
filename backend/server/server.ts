@@ -8,27 +8,15 @@ import * as http from 'http';
 import * as cors from 'cors';
 
 import IndexController from './controllers/IndexController';
-import SCMController from './controllers/SCMController';
 import ConfigurationController from './controllers/ConfigurationController';
-import GitLabClient from './util/GitLabClient';
-import {SCMClient} from './util/SCMClient';
-import ProjectCacheFactory from './util/ProjectCacheFactory';
-import Project from '../../shared/domain/Project';
-import {Status} from '../../shared/domain/Build';
-import CommitSummary from '../../shared/domain/CommitSummary';
-import moment = require('moment');
 
 export default class Server {
     private readonly _app: Application;
-    private readonly _scmClients: SCMClient[] = [];
-    private _timerHandles: Map<string, NodeJS.Timer> = new Map();
     private _server: http.Server;
 
     constructor(app: Application) {
         this._app = app;
         this._app.use(cors());
-
-        this._scmClients.push(new GitLabClient());
 
         this.viewEngineSetup();
         this.loggerSetup();
@@ -37,11 +25,6 @@ export default class Server {
 
         this.registerErrorHandler();
         this.registerNotFoundHandler();
-
-        this.updateProjectList();
-
-        // Update the project list every 10 minutes
-        setInterval(() => this.updateProjectList(), 60 * 10 * 1000);
     }
 
     get app() {
@@ -103,7 +86,6 @@ export default class Server {
         const router = express.Router();
 
         IndexController.register(this._app);
-        SCMController.register(this._app);
         ConfigurationController.register(this._app);
 
         this._app.use('/', router);
@@ -136,50 +118,6 @@ export default class Server {
                 message: err.message,
                 error: {}
             });
-        });
-    }
-
-    private updateProjectList() {
-        console.log('Updating projects...');
-        this._scmClients.forEach(client => {
-            client.getProjects().then(projects => {
-                projects.forEach(project => {
-                    this.setupProject(client, project);
-                    ProjectCacheFactory.getCache().update(project);
-                });
-            });
-        });
-    }
-
-    private setupProject(client: SCMClient, project: Project) {
-        project.commitSummary = new CommitSummary();
-        client.compileCommitSummaryForProject(project.id)
-            .then(summary => {
-                project.commitSummary = summary;
-                return project;
-            });
-
-        this.getProjectLatestBuild(client, project);
-
-        // If we already have a timer running for a specific project, we do
-        // not want to create a new one.
-        if (!this._timerHandles.get(project.id)) {
-            // This polling is in lieu of project hooks, which we'll add later
-            const timerHandle = setInterval(() => this.getProjectLatestBuild(client, project), 10 * 1000);
-            this._timerHandles.set(project.id, timerHandle);
-        }
-    }
-
-    private getProjectLatestBuild(client: SCMClient, project: Project) {
-        client.getLatestBuild(project.id).then(build => {
-            console.log(`Retrieved latest build for ${project.name} -> ${
-                build ? Status[build.status] : 'no build'}`);
-            project.lastBuild = build;
-
-            if (project.lastBuild) {
-                project.lastCommitBy = project.lastBuild.commit.by;
-                project.lastBuild.timeStartedFromNow = moment(project.lastBuild.timeStarted).fromNow();
-            }
         });
     }
 }
