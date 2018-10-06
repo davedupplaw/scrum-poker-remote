@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {StoreService} from '../store.service';
 import {Registration} from '../../../../shared/domain/Registration';
 
@@ -9,9 +9,9 @@ import {Registration} from '../../../../shared/domain/Registration';
   styleUrls: ['./participant-list.component.scss']
 })
 export class ParticipantListComponent implements OnInit {
-  public participants: Registration[];
+  @Input() public participants: Registration[];
 
-  constructor(public store: StoreService) {
+  constructor() {
   }
 
   ngOnInit() {

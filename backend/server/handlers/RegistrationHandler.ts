@@ -16,7 +16,6 @@ export class RegistrationHandler implements MessageHandler {
         console.log( 'Registration received.', registration );
 
         this._sessionStore.register(registration, ws);
-        this._sessionStore.broadcastTo(registration.session, registration);
 
         return false;
     }

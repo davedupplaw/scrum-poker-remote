@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Session} from '../../../shared/domain/Session';
-import {Registration} from "../../../shared/domain/Registration";
-import {SocketService} from "./socket.service";
-import {Message} from "../../../shared/domain/Message";
+import {Registration} from '../../../shared/domain/Registration';
+import {SocketService} from './socket.service';
+import {MessageType} from '../../../shared/domain/MessageType';
 
 @Component({
   selector: 'app-root',
@@ -15,16 +15,22 @@ export class AppComponent implements OnInit {
   public planningStarted = false;
   public awaitingPeople = true;
 
+  public participants: Registration[] = [];
   public session: Session;
 
   constructor(private socket: SocketService) {
   }
 
   ngOnInit() {
+    const handlers: { [t: string]: (msg: any) => void } = {};
+    handlers[MessageType.REGISTRATION] = (msg: any) => this.addRegistration(msg);
+
     this.socket.connect('http://localhost:3001')
       .asObservable()
       .subscribe( (message: any) => {
-        console.log( `Received Message: ${message._type}`);
+        if (handlers[message._type]) {
+          handlers[message._type](message);
+        }
       });
   }
 
@@ -41,5 +47,10 @@ export class AppComponent implements OnInit {
 
   register(register: Registration) {
     this.socket.register(register);
+  }
+
+  private addRegistration( msg: any ) {
+    const registration = new Registration( msg._name, msg._email, msg._session, msg._id );
+    this.participants.push(registration);
   }
 }

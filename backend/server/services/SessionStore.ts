@@ -3,6 +3,8 @@ import * as WebSocket from 'ws';
 import {Registration} from '../../../shared/domain/Registration';
 import {Session} from '../../../shared/domain/Session';
 import {Message} from '../../../shared/domain/Message';
+import {EndSession} from '../../../shared/domain/EndSession';
+import {Deregister} from "../../../shared/domain/Deregister";
 
 export class SessionStore {
     private _sessionsInProgress: {[sessionId: string]: Session} = {};
@@ -20,6 +22,8 @@ export class SessionStore {
             this._sessionToRegistrations[sessionId][registration.id] = registration;
             this._sessionToSocketMap[sessionId].push( ws );
 
+            this.broadcastTo(registration.session, registration);
+
             ws.onclose = () => this.deregister(registration, ws);
             ws.onerror = () => this.deregister(registration, ws);
 
@@ -35,6 +39,8 @@ export class SessionStore {
 
             const index = this._sessionToSocketMap[sessionId].indexOf( ws );
             this._sessionToSocketMap[sessionId].splice(index, 1);
+
+            this.broadcastTo(sessionId, new Deregister(registration) );
 
             console.log('Deregistered ', registration);
             this.sessionStats();
@@ -66,6 +72,8 @@ export class SessionStore {
     }
 
     endSession( sessionId: string ) {
+        this.broadcastTo( sessionId, new EndSession(sessionId) );
+
         delete this._sessionsInProgress[sessionId];
         delete this._sessionToRegistrations[sessionId];
         delete this._sessionToSocketMap[sessionId];
@@ -77,8 +85,10 @@ export class SessionStore {
 
     broadcastTo(sessionId: string, message: Message) {
         if ( this._sessionsInProgress[sessionId] ) {
+            const msgStr = JSON.stringify(message);
+            this._sessionLeaderSockets[sessionId].send(msgStr);
             this._sessionToSocketMap[sessionId].forEach(ws => {
-                ws.send(JSON.stringify(message));
+                ws.send(msgStr);
             });
         }
     }

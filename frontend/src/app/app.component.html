@@ -1,7 +1,7 @@
 <div *ngIf="planningStarted">
   <div *ngIf="awaitingPeople">
     <app-id-displayer [session]="session"></app-id-displayer>
-    <app-participant-list></app-participant-list>
+    <app-participant-list [participants]="participants"></app-participant-list>
   </div>
 </div>
 
