@@ -1,2 +1,18 @@
-<app-participant-list></app-participant-list>
-<app-join-form></app-join-form>
+<div *ngIf="planningStarted">
+  <div *ngIf="awaitingPeople">
+    <app-id-displayer [session]="session"></app-id-displayer>
+    <app-participant-list></app-participant-list>
+  </div>
+</div>
+
+<div *ngIf="!planningStarted">
+  <app-role-chooser *ngIf="!person" (person)="updatePerson($event)"></app-role-chooser>
+
+  <div *ngIf="person == 'po'">
+    <app-session-details (session)="startSession($event)"></app-session-details>
+  </div>
+
+  <div *ngIf="person == 'dev'">
+    <app-join-form (register)="register($event)"></app-join-form>
+  </div>
+</div>

@@ -10,12 +10,18 @@ import * as WebSocket from 'ws';
 
 import IndexController from './controllers/IndexController';
 import ConfigurationController from './controllers/ConfigurationController';
-import {Registration} from '../../shared/domain/Registration';
+
+import {MessageType} from '../../shared/domain/MessageType';
+import {RegistrationHandler} from './handlers/RegistrationHandler';
+import {MessageHandler} from './handlers/MessageHandler';
+import {SessionStore} from './services/SessionStore';
+import {StartSessionHandler} from "./handlers/StartSessionHandler";
 
 export default class Server {
     private readonly _app: Application;
     private _server: http.Server;
     private wss: WebSocket.Server;
+    private _sessionStore: SessionStore = new SessionStore();
 
     constructor(app: Application) {
         this._app = app;
@@ -65,16 +71,6 @@ export default class Server {
 
         this._server.listen(port);
         this.sockets();
-
-        console.log('>>>>>>>>>>>>>>>>>>> HERE <<<<<<<<<<<<<<<<<<<<');
-
-        this.wss.on('connection', function connection(ws: WebSocket) {
-            ws.on('message', function incoming(message) {
-                console.log('received: %s', message);
-            });
-
-            ws.send('something');
-        });
     }
 
     private listeningHandler() {
@@ -137,6 +133,24 @@ export default class Server {
     }
 
     private sockets(): void {
-        this.wss = new WebSocket.Server({ port: 3001 });
+        this.wss = new WebSocket.Server({port: 3001});
+
+        const handlers: { [t: string]: MessageHandler } = {};
+        handlers[MessageType.REGISTRATION] = new RegistrationHandler(this._sessionStore);
+        handlers[MessageType.SESSION_START] = new StartSessionHandler(this._sessionStore);
+
+        console.log(handlers);
+
+        this.wss.on('connection', function connection(ws: WebSocket) {
+            ws.on('message', function incoming(messageString: string) {
+                const message = JSON.parse(messageString);
+
+                if (handlers[message._type]) {
+                    handlers[message._type].handle(message, ws);
+                }
+            });
+
+            // ws.send('something');
+        });
     }
 }

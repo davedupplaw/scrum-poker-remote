@@ -3,6 +3,7 @@ import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {ScrumModule} from './scrum/scrum.module';
+import {SocketService} from "./socket.service";
 
 @NgModule({
   declarations: [AppComponent],
@@ -10,7 +11,7 @@ import {ScrumModule} from './scrum/scrum.module';
     BrowserModule,
     ScrumModule
   ],
-  providers: [],
+  providers: [SocketService],
   bootstrap: [AppComponent]
 })
 export class AppModule {

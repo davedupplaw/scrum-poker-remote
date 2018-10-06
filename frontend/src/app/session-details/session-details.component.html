@@ -1,0 +1,5 @@
+<form #form="ngForm">
+  <input type="text" name="title" id="title" placeholder="Session Title" required [(ngModel)]="newSession.name"/>
+  <input type="text" name="id" id="id" required [ngModel]="newSession.id"/>
+  <button type="button" (click)="submit(form.value)">Start Session</button>
+</form>

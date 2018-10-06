@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {Registration} from '../../../../shared/domain/Registration';
 import {SocketService} from '../socket.service';
 
@@ -10,18 +10,18 @@ import {SocketService} from '../socket.service';
 })
 export class JoinFormComponent implements OnInit {
 
-  public registration: Registration = new Registration('', '');
+  @Output() register = new EventEmitter<Registration>();
 
-  constructor(private socket: SocketService) {
+  public registration: Registration = new Registration('', '', '', '');
+
+  constructor() {
   }
 
   ngOnInit() {
   }
 
-  submit(registrationValue: Registration) {
-    console.log('Submit', registrationValue);
-    this.socket.register(registrationValue);
-    return false;
+  submit() {
+    console.log('Submit', this.registration);
+    this.register.emit(this.registration);
   }
-
 }
