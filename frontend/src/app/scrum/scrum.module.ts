@@ -8,6 +8,9 @@ import {RoleChooserComponent} from '../role-chooser/role-chooser.component';
 import {IdDisplayerComponent} from '../id-displayer/id-displayer.component';
 import {SessionDetailsComponent} from '../session-details/session-details.component';
 import {PokerBoardComponent} from '../poker-board/poker-board.component';
+import {StoryChooserComponent} from '../story-chooser/story-chooser.component';
+import {EstimateChooserComponent} from '../estimate-chooser/estimate-chooser.component';
+import {EstimatedStoriesComponent} from '../estimated-stories/estimated-stories.component';
 
 @NgModule({
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -17,7 +20,10 @@ import {PokerBoardComponent} from '../poker-board/poker-board.component';
     RoleChooserComponent,
     IdDisplayerComponent,
     SessionDetailsComponent,
-    PokerBoardComponent
+    PokerBoardComponent,
+    StoryChooserComponent,
+    EstimateChooserComponent,
+    EstimatedStoriesComponent
   ],
   declarations: [
     ParticipantListComponent,
@@ -25,7 +31,10 @@ import {PokerBoardComponent} from '../poker-board/poker-board.component';
     RoleChooserComponent,
     IdDisplayerComponent,
     SessionDetailsComponent,
-    PokerBoardComponent
+    PokerBoardComponent,
+    StoryChooserComponent,
+    EstimateChooserComponent,
+    EstimatedStoriesComponent
   ]
 })
 export class ScrumModule {

@@ -17,6 +17,8 @@ import {MessageHandler} from './handlers/MessageHandler';
 import {SessionStore} from './services/SessionStore';
 import {StartSessionHandler} from './handlers/StartSessionHandler';
 import {StartPokerHandler} from './handlers/StartPokerHandler';
+import {StoryChosenHandler} from './handlers/StoryChosenHandler';
+import {EstimateHandler} from './handlers/EstimateHandler';
 
 export default class Server {
     private readonly _app: Application;
@@ -140,6 +142,8 @@ export default class Server {
         handlers[MessageType.REGISTRATION] = new RegistrationHandler(this._sessionStore);
         handlers[MessageType.SESSION_START] = new StartSessionHandler(this._sessionStore);
         handlers[MessageType.START_POKER] = new StartPokerHandler(this._sessionStore);
+        handlers[MessageType.STORY_CHOSEN] = new StoryChosenHandler(this._sessionStore);
+        handlers[MessageType.ESTIMATE] = new EstimateHandler(this._sessionStore);
 
         console.log(handlers);
 

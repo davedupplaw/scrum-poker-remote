@@ -1,3 +1,10 @@
 <div>
-  Let's play poker!
+  Let's play poker!  {{ story.number }} {{ story.title }}
+</div>
+<div>
+  <ul>
+    <li *ngFor="let whom of estimatesFrom()">
+      {{ whom }} - {{ estimates[whom].estimate }}
+    </li>
+  </ul>
 </div>

@@ -3,7 +3,9 @@ import {Observable, Observer, Subject} from 'rxjs';
 import {Registration} from '../../../shared/domain/Registration';
 import {Session} from '../../../shared/domain/Session';
 import * as uuidv4 from 'uuid/v4';
-import {StartPoker} from "../../../shared/domain/StartPoker";
+import {StartPoker} from '../../../shared/domain/StartPoker';
+import {Story} from '../../../shared/domain/Story';
+import {Estimate} from '../../../shared/domain/Estimate';
 
 @Injectable()
 export class SocketService {
@@ -74,5 +76,13 @@ export class SocketService {
 
   startPoker(session: Session) {
     this.ws.send(JSON.stringify(new StartPoker(session.id)));
+  }
+
+  estimate(estimate: Estimate) {
+    this.ws.send(JSON.stringify(estimate));
+  }
+
+  chooseStory(story: Story) {
+    this.ws.send(JSON.stringify(story));
   }
 }

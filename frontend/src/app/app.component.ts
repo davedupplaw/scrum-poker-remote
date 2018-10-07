@@ -3,6 +3,15 @@ import {Session} from '../../../shared/domain/Session';
 import {Registration} from '../../../shared/domain/Registration';
 import {SocketService} from './socket.service';
 import {MessageType} from '../../../shared/domain/MessageType';
+import {Story} from '../../../shared/domain/Story';
+import {Estimate} from '../../../shared/domain/Estimate';
+
+export class EstimatedStory {
+  constructor( private _story: Story, private _estimates: { [whom: string]: Estimate } ) {}
+
+  get story() { return this._story; }
+  get estimates() { return this._estimates; }
+}
 
 @Component({
   selector: 'app-root',
@@ -17,8 +26,12 @@ export class AppComponent implements OnInit {
   public awaitingPeople = true;
   public isFacilitator: boolean;
 
+  public me: Registration;
   public participants: Registration[] = [];
   public session: Session;
+  public story: Story;
+  public estimates: { [whom: string]: Estimate };
+  public estimatedStories: {[storyId: string]: EstimatedStory };
 
   constructor(private socket: SocketService) {
   }
@@ -31,6 +44,8 @@ export class AppComponent implements OnInit {
     handlers[MessageType.ACTIVE_PARTICIPANTS] = (msg: any) => this.updateParticipants(msg);
     handlers[MessageType.DEREGISTRATION] = (msg: any) => this.userLeft(msg);
     handlers[MessageType.START_POKER] = (msg: any) => this.readyToStart(msg);
+    handlers[MessageType.STORY_CHOSEN] = (msg: any) => this.storyChosen(msg);
+    handlers[MessageType.ESTIMATE] = (msg: any) => this.receiveEstimate(msg);
 
     this.socket.connect('http://localhost:3001')
       .asObservable()
@@ -61,10 +76,11 @@ export class AppComponent implements OnInit {
    * button in the join form). This sends a message to the backend asking
    * to join.
    *
-   * @param register The registration information
+   * @param registration The registration information
    */
-  register(register: Registration) {
-    this.socket.register(register);
+  register(registration: Registration) {
+    this.me = registration;
+    this.socket.register(registration);
   }
 
   /**
@@ -99,6 +115,7 @@ export class AppComponent implements OnInit {
    */
   startPoker() {
     this.socket.startPoker( this.session );
+    this.estimatedStories = {};
   }
 
   /**
@@ -110,6 +127,8 @@ export class AppComponent implements OnInit {
   private sessionEnd(msg: any) {
     if ( msg.sessionId === this.session.id ) {
       this.session = undefined;
+      this.story = undefined;
+      this.estimates = {};
       this.planningStarted = false;
       this.awaitingPeople = true;
     }
@@ -142,5 +161,56 @@ export class AppComponent implements OnInit {
    */
   private readyToStart(msg: any) {
     this.awaitingPeople = false;
+  }
+
+  /**
+   * Called by the backend when the facilitator wants the
+   * team to estimate a story
+   * @param msg The StoryChosen message
+   */
+  private storyChosen(msg: any) {
+    this.story = new Story( msg._sessionId, msg._number, msg._title );
+    this.estimates = {};
+  }
+
+  /**
+   * Called when the facilitator uses the story-choose to
+   * choose a story to estimate.
+   * @param story The story to choose
+   */
+  chooseStory(story: Story) {
+    this.socket.chooseStory( story );
+  }
+
+  /**
+   * Called when a team member makes an estimate for a story
+   * @param estimate The estimate made
+   */
+  estimateMade(estimate: string) {
+    this.socket.estimate( new Estimate(this.me.id, estimate, this.story.number, this.session.id) );
+  }
+
+  /**
+   * Called when the backend lets us know that an estimate
+   * has been made for the current story
+   * @param msg The Estimate message
+   */
+  private receiveEstimate(msg: any) {
+    // TODO: check session/story
+    this.estimates[ msg._whom ] = new Estimate(msg._whom, msg._estimate, msg._story, msg._sessionId);
+  }
+
+  numberOfParticipants() {
+    return this.participants.length;
+  }
+
+  numberOfEstimates() {
+    return Object.keys(this.estimates).length;
+  }
+
+  stopEstimationOnStory() {
+    this.estimatedStories[this.story.number] = new EstimatedStory( this.story, this.estimates );
+    this.story = undefined;
+    this.estimates = {};
   }
 }

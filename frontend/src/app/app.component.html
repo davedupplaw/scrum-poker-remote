@@ -3,10 +3,27 @@
     <app-id-displayer [session]="session"></app-id-displayer>
     <app-participant-list [participants]="participants"></app-participant-list>
 
+    <button *ngIf="isFacilitator" type="button" (click)="startPoker()">Start Poker Session</button>
+    <div *ngIf="!isFacilitator">Waiting for everyone to arrive and facilitator to start the game</div>
+  </div>
+
+  <div *ngIf="!awaitingPeople">
     <ng-container *ngIf="isFacilitator">
-      <button type="button" (click)="startPoker()">Start Poker Session</button>
+      <app-story-chooser *ngIf="!story" [session]="session" (choose)="chooseStory($event)"></app-story-chooser>
+      <ng-container *ngIf="story">
+        <app-poker-board [story]="story" [estimates]="estimates" [participants]="participants"></app-poker-board>
+        <div *ngIf="numberOfParticipants() !== numberOfEstimates()">
+          Waiting for all participants to make an estimate...
+        </div>
+        <button type="button" (click)="stopEstimationOnStory()">Finish Estimation</button>
+      </ng-container>
+      <app-estimated-stories [estimatedStories]="estimatedStories"></app-estimated-stories>
     </ng-container>
-    <ng-container *ngIf="!isFacilitator"></ng-container>
+    <ng-container *ngIf="!isFacilitator">
+      <app-estimate-chooser *ngIf="story" (choose)="estimateMade($event)"></app-estimate-chooser>
+      <app-poker-board *ngIf="story" [story]="story" [estimates]="estimates" [participants]="participants"></app-poker-board>
+      <div *ngIf="!story">Waiting for facilitator to choose a story</div>
+    </ng-container>
   </div>
 </div>
 

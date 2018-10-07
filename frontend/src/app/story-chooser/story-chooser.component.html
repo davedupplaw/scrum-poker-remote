@@ -1,0 +1,5 @@
+<form #form="ngForm">
+  <input type="text" name="number" id="number" placeholder="Story Number/ID" required [(ngModel)]="story.number" />
+  <input type="text" name="title" id="title" placeholder="Story Title" [(ngModel)]="story.title" />
+  <button type="button" (click)="startEstimation()">Start Estimation</button>
+</form>

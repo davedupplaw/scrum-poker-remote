@@ -6,12 +6,16 @@ import {Message} from '../../../shared/domain/Message';
 import {EndSession} from '../../../shared/domain/EndSession';
 import {Deregister} from '../../../shared/domain/Deregister';
 import {ActiveParticipants} from '../../../shared/domain/ActiveParticipants';
+import {Estimate} from '../../../shared/domain/Estimate';
+import {Story} from '../../../shared/domain/Story';
 
 export class SessionStore {
     private _sessionsInProgress: {[sessionId: string]: Session} = {};
     private _sessionToSocketMap: {[sessionId: string]: WebSocket[]} = {};
     private _sessionToRegistrations: {[sessionId: string]: {[regId: string]: Registration}} = {};
     private _sessionLeaderSockets: {[sessionId: string]: WebSocket} = {};
+    private _sessionStoryEstimateMap: {[sessionId: string]: {[storyId: string]: Estimate[] }} = {};
+    private _sessionStoryMap: {[sessionId: string]: Story[] } = {};
 
     register( registration: Registration, ws: WebSocket ) {
         const sessionId = registration.session;
@@ -64,6 +68,8 @@ export class SessionStore {
             this._sessionToSocketMap[sessionId] = [];
             this._sessionsInProgress[sessionId] = session;
             this._sessionLeaderSockets[sessionId] = ws;
+            this._sessionStoryMap[sessionId] = [];
+            this._sessionStoryEstimateMap[sessionId] = {};
 
             // We send the session back to the requester, to say
             // that we've accepted it.
@@ -91,6 +97,8 @@ export class SessionStore {
         delete this._sessionToRegistrations[sessionId];
         delete this._sessionToSocketMap[sessionId];
         delete this._sessionLeaderSockets[sessionId];
+        delete this._sessionStoryMap[sessionId];
+        delete this._sessionStoryEstimateMap[sessionId];
 
         console.log( 'Ended session', sessionId );
         this.sessionStats();
@@ -118,5 +126,20 @@ export class SessionStore {
 
     sessionFor(sessionId: string) {
         return this._sessionsInProgress[sessionId];
+    }
+
+    storyChosen(story: Story) {
+        this._sessionStoryMap[story.sessionId].push( story );
+        this._sessionStoryEstimateMap[story.sessionId] = {};
+        this.broadcastTo( story.sessionId, story );
+    }
+
+    estimate(estimate: Estimate) {
+        if (!this._sessionStoryEstimateMap[estimate.sessionId][estimate.story]) {
+            this._sessionStoryEstimateMap[estimate.sessionId][estimate.story] = [];
+        }
+
+        this._sessionStoryEstimateMap[estimate.sessionId][estimate.story].push( estimate );
+        this.broadcastTo( estimate.sessionId, estimate );
     }
 }
