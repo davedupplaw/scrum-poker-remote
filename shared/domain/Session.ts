@@ -11,4 +11,5 @@ export class Session extends Message {
     get name(): string { return this._name; }
     get id(): string { return this._id; }
     get facilitator(): string { return this._facilitator; }
+    set facilitator(id: string) { this._facilitator = id; }
 }

@@ -15,6 +15,7 @@ export class AppComponent implements OnInit {
 
   public planningStarted = false;
   public awaitingPeople = true;
+  public isFacilitator: boolean;
 
   public participants: Registration[] = [];
   public session: Session;
@@ -51,10 +52,7 @@ export class AppComponent implements OnInit {
    * @param session The session information
    */
   startSession(session: Session) {
-    this.session = session;
-    this.planningStarted = true;
-
-    this.socket.startSession( this.session );
+    this.socket.startSession( session );
   }
 
   /**
@@ -88,9 +86,11 @@ export class AppComponent implements OnInit {
    * @param msg The Session Start message
    */
   private sessionStart(msg: any) {
-    this.session = new Session( msg._name, msg._id );
+    this.session = new Session( msg._name, msg._id, msg._facilitator );
+
     this.awaitingPeople = true;
-    this.planningStarted = true;
+    this.planningStarted = false;
+    this.isFacilitator = this.socket.isFacilitator( this.session.facilitator );
   }
 
   /**

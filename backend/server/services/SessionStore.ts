@@ -65,6 +65,10 @@ export class SessionStore {
             this._sessionsInProgress[sessionId] = session;
             this._sessionLeaderSockets[sessionId] = ws;
 
+            // We send the session back to the requester, to say
+            // that we've accepted it.
+            ws.send(JSON.stringify(session));
+
             ws.onclose = () => this.endSession( sessionId );
             ws.onerror = () => this.endSession( sessionId );
         } else {
@@ -81,7 +85,7 @@ export class SessionStore {
     }
 
     endSession( sessionId: string ) {
-        this.broadcastTo( sessionId, new EndSession(sessionId) );
+        this.broadcastTo( sessionId, new EndSession(sessionId), false );
 
         delete this._sessionsInProgress[sessionId];
         delete this._sessionToRegistrations[sessionId];
@@ -92,10 +96,14 @@ export class SessionStore {
         this.sessionStats();
     }
 
-    broadcastTo(sessionId: string, message: Message) {
+    broadcastTo(sessionId: string, message: Message, toFaciltator = true ) {
         if ( this._sessionsInProgress[sessionId] ) {
             const msgStr = JSON.stringify(message);
-            this._sessionLeaderSockets[sessionId].send(msgStr);
+
+            if ( toFaciltator ) {
+                this._sessionLeaderSockets[sessionId].send(msgStr);
+            }
+
             this._sessionToSocketMap[sessionId].forEach(ws => {
                 ws.send(msgStr);
             });

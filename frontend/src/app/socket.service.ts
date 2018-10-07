@@ -63,6 +63,11 @@ export class SocketService {
    * @param session The session message
    */
   public startSession(session: Session) {
+    session.facilitator = this.uuid;
     this.ws.send(JSON.stringify(session));
+  }
+
+  isFacilitator(idToCheck: string) {
+    return idToCheck === this.uuid;
   }
 }

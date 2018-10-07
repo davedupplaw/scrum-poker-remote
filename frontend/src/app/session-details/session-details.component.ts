@@ -22,7 +22,6 @@ export class SessionDetailsComponent implements OnInit {
   }
 
   submit() {
-    console.log( this.newSession );
     this.session.emit( this.newSession );
   }
 }
