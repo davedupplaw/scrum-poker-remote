@@ -10,7 +10,7 @@ export class SessionDetailsComponent implements OnInit {
 
   @Output() public session: EventEmitter<Session> = new EventEmitter<Session>();
 
-  public newSession: Session = new Session('Planning Session', this.randomId());
+  public newSession: Session = new Session('Planning Session', this.randomId(), '');
 
   constructor() { }
 

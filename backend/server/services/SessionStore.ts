@@ -4,7 +4,8 @@ import {Registration} from '../../../shared/domain/Registration';
 import {Session} from '../../../shared/domain/Session';
 import {Message} from '../../../shared/domain/Message';
 import {EndSession} from '../../../shared/domain/EndSession';
-import {Deregister} from "../../../shared/domain/Deregister";
+import {Deregister} from '../../../shared/domain/Deregister';
+import {ActiveParticipants} from '../../../shared/domain/ActiveParticipants';
 
 export class SessionStore {
     private _sessionsInProgress: {[sessionId: string]: Session} = {};
@@ -19,9 +20,17 @@ export class SessionStore {
         if ( !this._sessionsInProgress[sessionId] ) {
             console.log( 'No such session' );
         } else {
+            // Tell the player about the session they registered with
+            ws.send(JSON.stringify(this.sessionFor(sessionId)));
+
+            // Tell the player who is already registered with the session
+            const registrations = this.registrationsFor(sessionId);
+            ws.send(JSON.stringify(new ActiveParticipants(Object.keys(registrations).map(k => registrations[k]))));
+
             this._sessionToRegistrations[sessionId][registration.id] = registration;
             this._sessionToSocketMap[sessionId].push( ws );
 
+            // Tell everyone this registration happened
             this.broadcastTo(registration.session, registration);
 
             ws.onclose = () => this.deregister(registration, ws);
@@ -97,5 +106,9 @@ export class SessionStore {
         console.log('Session count: ', Object.keys(this._sessionsInProgress).length);
         console.log('Registration Counts: ', Object.keys(this._sessionToRegistrations)
             .map(sid => `${sid} = ${Object.keys(this._sessionToRegistrations[sid]).length}`));
+    }
+
+    sessionFor(sessionId: string) {
+        return this._sessionsInProgress[sessionId];
     }
 }

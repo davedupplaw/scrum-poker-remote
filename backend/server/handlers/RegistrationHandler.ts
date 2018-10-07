@@ -8,12 +8,12 @@ import {SessionStore} from '../services/SessionStore';
  * Class to handle messages for new registrations to a planning session.
  */
 export class RegistrationHandler implements MessageHandler {
-    constructor( private _sessionStore: SessionStore ) {
+    constructor(private _sessionStore: SessionStore) {
     }
 
     handle(message: any, ws: WebSocket): boolean {
-        const registration = Registration.fromJson( message );
-        console.log( 'Registration received.', registration );
+        const registration = Registration.fromJson(message);
+        console.log('Registration received.', registration);
 
         this._sessionStore.register(registration, ws);
 

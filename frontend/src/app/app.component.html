@@ -1,11 +1,16 @@
-<div *ngIf="planningStarted">
+<div *ngIf="session">
   <div *ngIf="awaitingPeople">
     <app-id-displayer [session]="session"></app-id-displayer>
     <app-participant-list [participants]="participants"></app-participant-list>
+
+    <ng-container *ngIf="isFacilitator">
+      <button type="button" (click)="startPoker()">Start Poker Session</button>
+    </ng-container>
+    <ng-container *ngIf="!isFacilitator"></ng-container>
   </div>
 </div>
 
-<div *ngIf="!planningStarted">
+<div *ngIf="!session">
   <app-role-chooser *ngIf="!person" (person)="updatePerson($event)"></app-role-chooser>
 
   <div *ngIf="person == 'po'">
