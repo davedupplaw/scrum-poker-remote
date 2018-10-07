@@ -30,6 +30,7 @@ export class AppComponent implements OnInit {
     handlers[MessageType.SESSION_END] = (msg: any) => this.sessionEnd(msg);
     handlers[MessageType.ACTIVE_PARTICIPANTS] = (msg: any) => this.updateParticipants(msg);
     handlers[MessageType.DEREGISTRATION] = (msg: any) => this.userLeft(msg);
+    handlers[MessageType.START_POKER] = (msg: any) => this.readyToStart(msg);
 
     this.socket.connect('http://localhost:3001')
       .asObservable()
@@ -97,7 +98,7 @@ export class AppComponent implements OnInit {
    * This is called when the facilitator starts the poker session.
    */
   startPoker() {
-    this.awaitingPeople = false;
+    this.socket.startPoker( this.session );
   }
 
   /**
@@ -132,5 +133,14 @@ export class AppComponent implements OnInit {
     const userId = msg.registration._id;
     const index = this.participants.findIndex(p => p.id === userId );
     this.participants.splice( index, 1 );
+  }
+
+  /**
+   * Called by the backend when the team is ready yo
+   * start playing scrum poker
+   * @param msg The StartPoker message
+   */
+  private readyToStart(msg: any) {
+    this.awaitingPeople = false;
   }
 }

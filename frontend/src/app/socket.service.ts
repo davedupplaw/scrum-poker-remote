@@ -3,6 +3,7 @@ import {Observable, Observer, Subject} from 'rxjs';
 import {Registration} from '../../../shared/domain/Registration';
 import {Session} from '../../../shared/domain/Session';
 import * as uuidv4 from 'uuid/v4';
+import {StartPoker} from "../../../shared/domain/StartPoker";
 
 @Injectable()
 export class SocketService {
@@ -69,5 +70,9 @@ export class SocketService {
 
   isFacilitator(idToCheck: string) {
     return idToCheck === this.uuid;
+  }
+
+  startPoker(session: Session) {
+    this.ws.send(JSON.stringify(new StartPoker(session.id)));
   }
 }

@@ -15,7 +15,8 @@ import {MessageType} from '../../shared/domain/MessageType';
 import {RegistrationHandler} from './handlers/RegistrationHandler';
 import {MessageHandler} from './handlers/MessageHandler';
 import {SessionStore} from './services/SessionStore';
-import {StartSessionHandler} from "./handlers/StartSessionHandler";
+import {StartSessionHandler} from './handlers/StartSessionHandler';
+import {StartPokerHandler} from './handlers/StartPokerHandler';
 
 export default class Server {
     private readonly _app: Application;
@@ -138,6 +139,7 @@ export default class Server {
         const handlers: { [t: string]: MessageHandler } = {};
         handlers[MessageType.REGISTRATION] = new RegistrationHandler(this._sessionStore);
         handlers[MessageType.SESSION_START] = new StartSessionHandler(this._sessionStore);
+        handlers[MessageType.START_POKER] = new StartPokerHandler(this._sessionStore);
 
         console.log(handlers);
 
