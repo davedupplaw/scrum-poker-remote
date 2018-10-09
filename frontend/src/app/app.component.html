@@ -30,11 +30,11 @@
 <div *ngIf="!session">
   <app-role-chooser *ngIf="!person" (person)="updatePerson($event)"></app-role-chooser>
 
-  <div *ngIf="person == 'po'">
+  <div *ngIf="person == 'facilitator'">
     <app-session-details (session)="startSession($event)"></app-session-details>
   </div>
 
-  <div *ngIf="person == 'dev'">
+  <div *ngIf="person == 'team'">
     <app-join-form (register)="register($event)"></app-join-form>
   </div>
 </div>

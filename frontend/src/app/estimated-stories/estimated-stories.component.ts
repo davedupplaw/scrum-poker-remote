@@ -25,7 +25,8 @@ export class EstimatedStoriesComponent implements OnInit {
 
   averageSize(storyId: string): number {
     const whoVoted = Object.keys(this.estimatedStories[storyId].estimates);
-    return whoVoted.map(w => parseInt(this.estimatedStories[storyId].estimates[w].estimate, 10))
-      .reduce((a, b) => a + b) / whoVoted.length;
+    const estimates = whoVoted.map(w => parseInt(this.estimatedStories[storyId].estimates[w].estimate, 10))
+                              .filter( n => !isNaN(n) );
+    return estimates.reduce((a, b) => a + b) / estimates.length;
   }
 }
