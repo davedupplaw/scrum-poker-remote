@@ -1,5 +1,11 @@
 <ul>
   <li *ngFor="let storyId of storyIds()">
-    {{ estimatedStories[storyId].story.number }} - {{ averageSize(storyId) }}
+    <span class="story">{{ estimatedStories[storyId].story.number }}</span>
+    <ul>
+      <li *ngFor="let whom of whoPartook(storyId)">
+        {{ whom }} - {{ estimatedStories[storyId].estimates[whom].estimate }}
+      </li>
+    </ul>
+    <span class="average">{{ averageSize(storyId) }}</span>
   </li>
 </ul>
