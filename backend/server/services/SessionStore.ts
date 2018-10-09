@@ -51,9 +51,13 @@ export class SessionStore {
             delete this._sessionToRegistrations[sessionId][registration.id];
 
             const index = this._sessionToSocketMap[sessionId].indexOf( ws );
-            this._sessionToSocketMap[sessionId].splice(index, 1);
+            if ( index !== -1 ) {
+                this._sessionToSocketMap[sessionId].splice(index, 1);
+            }
 
-            this.broadcastTo(sessionId, new Deregister(registration) );
+            // Update the players who are already registered with the session on who is left
+            const registrations = this.registrationsFor(sessionId);
+            this.broadcastTo(sessionId, new ActiveParticipants(Object.keys(registrations).map(k => registrations[k])));
 
             console.log('Deregistered ', registration);
             this.sessionStats();

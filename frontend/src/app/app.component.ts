@@ -5,13 +5,7 @@ import {SocketService} from './socket.service';
 import {MessageType} from '../../../shared/domain/MessageType';
 import {Story} from '../../../shared/domain/Story';
 import {Estimate} from '../../../shared/domain/Estimate';
-
-export class EstimatedStory {
-  constructor( private _story: Story, private _estimates: { [whom: string]: Estimate } ) {}
-
-  get story() { return this._story; }
-  get estimates() { return this._estimates; }
-}
+import {EstimatedStory} from '../../../shared/domain/EstimatedStory';
 
 @Component({
   selector: 'app-root',
@@ -46,6 +40,7 @@ export class AppComponent implements OnInit {
     handlers[MessageType.START_POKER] = (msg: any) => this.readyToStart(msg);
     handlers[MessageType.STORY_CHOSEN] = (msg: any) => this.storyChosen(msg);
     handlers[MessageType.ESTIMATE] = (msg: any) => this.receiveEstimate(msg);
+    handlers[MessageType.ESTIMATED_STORY] = (msg: any) => this.estimatesChosen(msg);
 
     this.socket.connect('http://localhost:3001')
       .asObservable()
@@ -151,7 +146,9 @@ export class AppComponent implements OnInit {
   private userLeft(msg: any) {
     const userId = msg.registration._id;
     const index = this.participants.findIndex(p => p.id === userId );
-    this.participants.splice( index, 1 );
+    if (index !== -1 ) {
+      this.participants.splice( index, 1 );
+    }
   }
 
   /**
@@ -208,9 +205,32 @@ export class AppComponent implements OnInit {
     return Object.keys(this.estimates).length;
   }
 
-  stopEstimationOnStory() {
-    this.estimatedStories[this.story.number] = new EstimatedStory( this.story, this.estimates );
+  /**
+   * Called when the backend acknowledges a complete poker game.
+   * @param msg The message
+   */
+  estimatesChosen(msg: any) {
+    // TODO: check session/story
+    if ( this.isFacilitator ) {
+      const est = {};
+      Object.entries(msg._estimates).forEach( e => {
+        const v = e[1] as any;
+        est[e[0]] = new Estimate( v._whom, v._estimate, v._story, msg._sessionId );
+      });
+
+      this.estimatedStories[this.story.number] =
+        new EstimatedStory( msg._sessionId,
+          new Story( msg._sessionId, msg._story._number, msg._story._title ), est );
+    }
+
     this.story = undefined;
     this.estimates = {};
+  }
+
+  /**
+   * Called when the facilitator completes a poker game.
+   */
+  stopEstimationOnStory() {
+    this.socket.finishEstimating( this.session.id, this.story, this.estimates );
   }
 }

@@ -1,10 +1,11 @@
 export enum MessageType {
+    SESSION_START = 'session-start',
+    REGISTRATION = 'registration',
+    ACTIVE_PARTICIPANTS = 'active-participants',
     STORY_CHOSEN = 'story-chosen',
     START_POKER = 'start-poker',
-    ACTIVE_PARTICIPANTS = 'active-participants',
-    SESSION_START = 'session-start',
-    SESSION_END = 'session-end',
     ESTIMATE = 'estimate',
-    REGISTRATION = 'registration',
+    ESTIMATED_STORY = 'estimated-story',
+    SESSION_END = 'session-end',
     DEREGISTRATION = 'deregistration'
 }

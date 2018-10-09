@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {EstimatedStory} from '../app.component';
+import {EstimatedStory} from '../../../../shared/domain/EstimatedStory';
 
 @Component({
   selector: 'app-estimated-stories',
@@ -14,7 +14,13 @@ export class EstimatedStoriesComponent implements OnInit {
   ngOnInit() {
   }
 
-  storyIds() {
+  storyIds(): string[] {
     return Object.keys(this.estimatedStories);
+  }
+
+  averageSize(storyId: string): number {
+    const whoVoted = Object.keys(this.estimatedStories[storyId].estimates);
+    return whoVoted.map(w => parseInt(this.estimatedStories[storyId].estimates[w].estimate, 10) )
+                   .reduce( (a, b) => a + b ) / whoVoted.length;
   }
 }

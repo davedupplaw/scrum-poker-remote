@@ -19,6 +19,7 @@ import {StartSessionHandler} from './handlers/StartSessionHandler';
 import {StartPokerHandler} from './handlers/StartPokerHandler';
 import {StoryChosenHandler} from './handlers/StoryChosenHandler';
 import {EstimateHandler} from './handlers/EstimateHandler';
+import {EstimatedStoryHandler} from './handlers/EstimatedStoryHandler';
 
 export default class Server {
     private readonly _app: Application;
@@ -144,12 +145,14 @@ export default class Server {
         handlers[MessageType.START_POKER] = new StartPokerHandler(this._sessionStore);
         handlers[MessageType.STORY_CHOSEN] = new StoryChosenHandler(this._sessionStore);
         handlers[MessageType.ESTIMATE] = new EstimateHandler(this._sessionStore);
+        handlers[MessageType.ESTIMATED_STORY] = new EstimatedStoryHandler(this._sessionStore);
 
         console.log(handlers);
 
         this.wss.on('connection', function connection(ws: WebSocket) {
             ws.on('message', function incoming(messageString: string) {
                 const message = JSON.parse(messageString);
+                console.log('Received: ', message );
 
                 if (handlers[message._type]) {
                     handlers[message._type].handle(message, ws);

@@ -6,6 +6,7 @@ import * as uuidv4 from 'uuid/v4';
 import {StartPoker} from '../../../shared/domain/StartPoker';
 import {Story} from '../../../shared/domain/Story';
 import {Estimate} from '../../../shared/domain/Estimate';
+import {EstimatedStory} from '../../../shared/domain/EstimatedStory';
 
 @Injectable()
 export class SocketService {
@@ -84,5 +85,9 @@ export class SocketService {
 
   chooseStory(story: Story) {
     this.ws.send(JSON.stringify(story));
+  }
+
+  finishEstimating(sessionId: string, story: Story, estimates: { [p: string]: Estimate }) {
+    this.ws.send(JSON.stringify(new EstimatedStory(sessionId, story, estimates)));
   }
 }

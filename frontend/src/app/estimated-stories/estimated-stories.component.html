@@ -1,5 +1,5 @@
 <ul>
   <li *ngFor="let storyId of storyIds()">
-    {{ estimatedStories[storyId].story.number }}
+    {{ estimatedStories[storyId].story.number }} - {{ averageSize(storyId) }}
   </li>
 </ul>
